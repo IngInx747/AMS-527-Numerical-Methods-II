@@ -15,7 +15,7 @@ function solve_9_5()
   endif
 
   tol = 1e-6;
-  max_iter = 1000;
+  max_iter = 100;
 
   [x, iter] = solve_newton_backtrack(f, J, x0, tol, max_iter);
   y = f(x);
