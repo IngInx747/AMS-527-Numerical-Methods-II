@@ -1,10 +1,13 @@
-# Newton method
-function [x, iter] = solve_newton(f, J, x, tol, max_iter)
+# Newton method - root search
+function [x, iter] = solve_newton(f, J, x, tol, max_iter, track=@(~)0)
 
   # J(x_k)*s_k = -f(x_k)
   # x_{k+1} = x_k + s_k
 
   for iter = 1 : max_iter
+    # record current position
+    track(x);
+    # evaluate residue
     y = f(x);
     if norm(y) < tol
       break
@@ -21,5 +24,8 @@ function [x, iter] = solve_newton(f, J, x, tol, max_iter)
       break
     endif
   endfor
+
+  # record last position
+  track(x);
 
 endfunction

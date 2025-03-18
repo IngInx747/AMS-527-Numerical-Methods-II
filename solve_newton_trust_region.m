@@ -3,7 +3,7 @@
 # J: Jacobian of f
 # x: initial guess
 # R: initial trust region radius
-function [x, iter] = solve_newton_trust_region(f, J, x, R, t1, t2, r1, r2, tol, max_iter)
+function [x, iter] = solve_newton_trust_region(f, J, x, R, t1, t2, r1, r2, tol, max_iter, track=@(~)0)
 
   # merit function u(x) = |f(x)|^2/2
   u = @(x)(f(x)'*f(x)*.5);
@@ -13,6 +13,8 @@ function [x, iter] = solve_newton_trust_region(f, J, x, R, t1, t2, r1, r2, tol, 
   H = @(x)(J(x)'*J(x)); # Hessian of u (approximated)
 
   for iter = 1 : max_iter
+    # record current position
+    track(x);
     # construct the approximation model
     g = G(x);
     B = H(x);
@@ -37,10 +39,13 @@ function [x, iter] = solve_newton_trust_region(f, J, x, R, t1, t2, r1, r2, tol, 
         R *= r2;
       endif
       if norm(p) < tol
-        return
+        break
       endif
     endif
   endfor
+
+  # record last position
+  track(x);
 
 endfunction
 

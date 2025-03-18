@@ -1,5 +1,5 @@
 # Broyden's method, limited-memory variants
-function [x, iter] = solve_broyden_limem(f, B, x, m, tol, max_iter)
+function [x, iter] = solve_broyden_limem(f, B, x, m, tol, max_iter, track=@(~)0)
 
   y = f(x);
   H = Q = inv(B); # Q = H_0 = B_0^{-1}
@@ -10,6 +10,8 @@ function [x, iter] = solve_broyden_limem(f, B, x, m, tol, max_iter)
   V = zeros(N, 0);
 
   for iter = 1 : max_iter
+    # record current position
+    track(x);
     # update searching direction
     s = -H*y;
     # move to the new position
@@ -26,10 +28,13 @@ function [x, iter] = solve_broyden_limem(f, B, x, m, tol, max_iter)
     I = eye(M);
     J = I + V'*Q*U;
     if rank(J) < M
-      break
+      return
     endif
     H = Q - (Q*U)*(J\V')*Q;
   endfor
+
+  # record last position
+  track(x);
 
 endfunction
 
@@ -38,7 +43,8 @@ function U = enqueue(U, u, m)
   if columns(U) < m
     U = [U, u];
   else
-    U = [U(:, 2:m), u];
+    U(:, 1:m-1) = U(:, 2:m);
+    U(:, m) = u;
   endif
 
 endfunction

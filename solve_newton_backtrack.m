@@ -1,5 +1,5 @@
 # Newton method with backtracking linear search
-function [x, iter] = solve_newton_backtrack(f, J, x, tol, max_iter)
+function [x, iter] = solve_newton_backtrack(f, J, x, tol, max_iter, track=@(~)0)
 
   phi = @(x)(f(x)'*f(x)*.5); # merit function
   grd = @(x)(J(x)'*f(x)); # gradient of f at x
@@ -9,6 +9,9 @@ function [x, iter] = solve_newton_backtrack(f, J, x, tol, max_iter)
   a_0 = 1.;
 
   for iter = 1 : max_iter
+    # record current position
+    track(x);
+    # evaluate residue
     y = f(x); # f_k = f(x_k)
     if norm(y) < tol
       return
@@ -27,9 +30,12 @@ function [x, iter] = solve_newton_backtrack(f, J, x, tol, max_iter)
     # update position
     x += s*a;
     if norm(s) < tol
-      return
+      break
     endif
   endfor
+
+  # record last position
+  track(x);
 
 endfunction
 
