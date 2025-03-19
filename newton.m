@@ -5,6 +5,11 @@ function [x, iter, xs] = newton(f, x, tol, max_iter, do_line_search = true)
 
   xs = []; # searching history
 
+  if nargout(f) < 3
+    printf("Target function requires C2 smoothness!\n");
+    iter = 0; return
+  endif
+
   for iter = 1 : max_iter
     # record current position
     if nargout > 2
@@ -17,17 +22,18 @@ function [x, iter, xs] = newton(f, x, tol, max_iter, do_line_search = true)
     endif
     # check degeneration
     if rank(H) < rows(x)
+      printf("Hessian is degenerated!\n");
       return
     endif
     # searching direction
     s = -H\g;
     if norm(s) < tol
-      break
+      return
     endif
     # determine step length
     if do_line_search
-      a = line_search(f, x, s, max_iter);
-    elseif
+      a = line_search(f, x, s, :);
+    else
       a = 1.;
     endif
     # update position

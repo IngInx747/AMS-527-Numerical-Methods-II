@@ -1,6 +1,8 @@
 # Broyden–Fletcher–Goldfarb–Shanno method
 function [x, iter] = solve_bfgs(G, B, x, tol, max_iter, track=@(~)0)
 
+  #[x, iter] = solve_bfgs_direct(G, B, x, tol, max_iter, track); return
+
   if !issymmetric(B)
     printf("BFGS: Input Hessian is not symmetric\n");
     iter = 0; return

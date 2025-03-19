@@ -28,7 +28,7 @@ function solve_rosenbrock(x, y, a, b)
     plot_path("color", "k", "marker", ".", "markersize", 15, "linestyle", "-.", "linewidth", 3);
   endif
 
-  if 1
+  if 0
     tracker([]); # reset tracker
     [x, iter] = solve_newton_backtrack(G, H, x0, tol, max_iter, @tracker);
     printf("---- Linear-search method ----\n");
@@ -69,7 +69,7 @@ function solve_rosenbrock(x, y, a, b)
     plot_path("color", "c", "marker", ".", "linestyle", "none");
   endif
 
-  if 0
+  if 1
     tracker([]); # reset tracker
     [x, iter] = solve_bfgs(G, H(x0), x0, tol, max_iter, @tracker);
     printf("---- BFGS method with B_0 = J(x_0) ----\n");

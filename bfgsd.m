@@ -1,7 +1,7 @@
-# Broyden's Quasi-Newton method (inversed Hessian)
+# Broyden–Fletcher–Goldfarb–Shanno method (direct Hessian)
 # f: scalar, gradient, Hessian
 # x: initial guessing position
-function [x, iter, xs] = broyden(f, x, tol, max_iter, do_line_search = true)
+function [x, iter, xs] = bfgsd(f, x, tol, max_iter, do_line_search = true)
 
   xs = []; # searching history
 
@@ -15,12 +15,10 @@ function [x, iter, xs] = broyden(f, x, tol, max_iter, do_line_search = true)
     iter = 0; return
   endif
 
-  if rank(B) < rows(x)
-    printf("Initial Hessian is degenerated!\n");
+  if !issymmetric(B)
+    printf("Initial Hessian is not symmetric!\n");
     iter = 0; return
   endif
-
-  C = inv(B); # inversed Hessian surrogate
 
   for iter = 1 : max_iter
     # record current position
@@ -28,9 +26,9 @@ function [x, iter, xs] = broyden(f, x, tol, max_iter, do_line_search = true)
       xs = [xs, x];
     endif
     # searching direction
-    s = -C*g;
+    s = -B\g;
     if norm(s) < tol
-      break
+      return
     endif
     # determine step length
     if do_line_search
@@ -40,14 +38,19 @@ function [x, iter, xs] = broyden(f, x, tol, max_iter, do_line_search = true)
     endif
     # update position
     x += s*a;
+    # backup results
+    S = g*g'/(s'*g);
+    y = g;
     # evaluate function
     [~, g] = feval(f, x);
     if norm(g) < tol
-      break
+      return
     endif
+    # delta gradient
+    y = g - y;
     # update Hessian surrogate
-    C -= (C*g*s'*C/(s'*s)) / (1 + s'*C*g/(s'*s));
-    if rank(C) < rows(x)
+    B += S + y*y'/(s'*y);
+    if rank(B) < rows(x)
       printf("Hessian is degenerated!\n");
       return
     endif
