@@ -1,6 +1,7 @@
 # Limited-Memory Broyden's Quasi-Newton method
-# f: scalar, gradient, Hessian
-# x: initial guessing position
+# f: [scalar, gradient,  Hessian] (optimal problem)
+#    [merit, equations, Jacobian] (solving equations)
+# x: initial guess
 function [x, iter, xs] = broydenlm(f, x, m, tol, max_iter, do_line_search = true)
 
   xs = []; # searching history
@@ -51,6 +52,7 @@ function [x, iter, xs] = broydenlm(f, x, m, tol, max_iter, do_line_search = true
     n = columns(U);
     J = eye(n) + V'*H_0*U;
     if rank(J) < n
+      printf("Memory is ill-formed!\n");
       return
     endif
     H = H_0 - (H_0*U)*(J\V')*H_0;

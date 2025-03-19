@@ -1,6 +1,7 @@
 # Limited-Memory BFGS method
-# f: scalar, gradient, Hessian
-# x: initial guessing position
+# f: [scalar, gradient,  Hessian] (optimal problem)
+#    [merit, equations, Jacobian] (solving equations)
+# x: initial guess
 function [x, iter, xs] = bfgslm(f, x, m, tol, max_iter, do_line_search = true)
 
   xs = []; # searching history
@@ -28,7 +29,7 @@ function [x, iter, xs] = bfgslm(f, x, m, tol, max_iter, do_line_search = true)
     endif
     # determine step length
     if do_line_search
-      a = line_search(f, x, -g, :);
+      a = line_search(f, x, -g, 10, :);
     else
       a = 1.;
     endif

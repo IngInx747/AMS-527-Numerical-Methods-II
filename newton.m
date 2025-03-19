@@ -1,6 +1,7 @@
 # Newton-Raphson Algorithm
-# f: scalar, gradient, Hessian
-# x: initial guessing position
+# f: [scalar, gradient,  Hessian] (optimal problem)
+#    [merit, equations, Jacobian] (solving equations)
+# x: initial guess
 function [x, iter, xs] = newton(f, x, tol, max_iter, do_line_search = true)
 
   xs = []; # searching history

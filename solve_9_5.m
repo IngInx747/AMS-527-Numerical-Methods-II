@@ -27,7 +27,8 @@ function solve_9_5()
     "linestyle", "-", ...
     "linewidth", 2);
 
-  [x, iter] = broyden(f, x0, tol, max_iter);
+  if 0
+  [x, iter, xs] = broyden(f, x0, tol, max_iter);
   printf("---- Broyden method ----\n");
   printf("x_sol = (%f, %f)\n", x(1), x(2));
   printf("|f(x_sol)| = %f\n", norm(f(x)));
@@ -38,6 +39,7 @@ function solve_9_5()
     "markersize", 20, ...
     "linestyle", "--", ...
     "linewidth", 2);
+  endif
 
   R0 = .5; #norm(H_0'*g_0)*.5;
   [x, iter, xs] = trust_region(f, x0, R0, .25, .75, .5, 2., tol, max_iter);

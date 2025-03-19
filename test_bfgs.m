@@ -36,7 +36,7 @@ function test_bfgs()
     "linewidth", 2);
   endif
 
-  if 0
+  if 1
   [x, iter, xs] = bfgs(f, x0, tol, max_iter);
   printf("---- BFGS method ----\n");
   printf("x_sol = (%f, %f)\n", x(1), x(2));
