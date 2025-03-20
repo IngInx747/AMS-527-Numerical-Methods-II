@@ -10,9 +10,8 @@ function solve_8_2()
   tol = 1e-10;
   max_iter = 1000;
 
-  [x, iter] = muller(f, x0, x1, x2, tol, max_iter);
-
   printf("---- Muller method ----\n");
+  [x, iter] = muller(f, x0, x1, x2, tol, max_iter);
   printf("x_sol = %f + %fi\n", real(x), imag(x));
   printf("|f(x_sol)| = %f\n", norm(f(x)));
   printf("iterations: %d\n", iter);

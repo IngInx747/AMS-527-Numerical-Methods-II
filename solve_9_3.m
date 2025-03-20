@@ -11,14 +11,14 @@ function solve_9_3()
   tol = 1e-6;
   max_iter = 1000;
 
-  [x, iter] = newton(f, x0, tol, max_iter, false);
   printf("---- Newton method ----\n");
+  [x, iter] = newton(f, x0, tol, max_iter, false);
   printf("x_sol = %f\n", x);
   printf("|f(x_sol)| = %f\n", norm(f(x)));
   printf("iterations: %d\n", iter);
 
-  [x, iter] = newton(f, x0, tol, max_iter);
   printf("---- Newton method with backtrack ----\n");
+  [x, iter] = newton(f, x0, tol, max_iter);
   printf("x_sol = %f\n", x);
   printf("|f(x_sol)| = %f\n", norm(f(x)));
   printf("iterations: %d\n", iter);

@@ -7,20 +7,20 @@ function solve_8_3()
   tol = 1e-6;
   max_iter = 1000;
 
-  [x, iter] = newton(f, x0, tol, max_iter);
   printf("---- Newton method ----\n");
+  [x, iter] = newton(f, x0, tol, max_iter);
   printf("x_sol = (%f, %f, %f, %f)\n", x(1), x(2), x(3), x(4));
   printf("|f(x_sol)| = %f\n", norm(f(x)));
   printf("iterations: %d\n", iter);
 
-  [x, iter] = broyden(f, x0, tol, max_iter);
   printf("---- Broyden method ----\n");
+  [x, iter] = broyden(f, x0, tol, max_iter);
   printf("x_sol = (%f, %f, %f, %f)\n", x(1), x(2), x(3), x(4));
   printf("|f(x_sol)| = %f\n", norm(f(x)));
   printf("iterations: %d\n", iter);
 
-  [x, iter] = broydenlm(f, x0, 10, tol, max_iter);
   printf("---- Limited-memory Broyden method ----\n");
+  [x, iter] = broydenlm(f, x0, 10, tol, max_iter);
   printf("x_sol = (%f, %f, %f, %f)\n", x(1), x(2), x(3), x(4));
   printf("|f(x_sol)| = %f\n", norm(f(x)));
   printf("iterations: %d\n", iter);

@@ -2,16 +2,16 @@
 function test_bfgs()
 
   f = @rosenbrock;
-  #x0 = [2.5; 2.0];
+  #x0 = [1.0; 2.0];
   x0 = [-1.2; 1.0];
 
   tol = 1e-6;
-  max_iter = 5000;
+  max_iter = 1000;
 
   hold on;
 
-  [x, iter, xs] = newton(f, x0, tol, max_iter);
   printf("---- Newton method ----\n");
+  [x, iter, xs] = newton(f, x0, tol, max_iter);
   printf("x_sol = (%f, %f)\n", x(1), x(2));
   printf("|f(x_sol)| = %f\n", norm(f(x)));
   printf("iterations: %d\n", iter);
@@ -23,8 +23,8 @@ function test_bfgs()
     "linewidth", 2);
 
   if 0
+  printf("---- BFGS method ----\n");
   [x, iter, xs] = bfgsd(f, x0, tol, max_iter);
-  printf("---- BFGS method ----\n");
   printf("x_sol = (%f, %f)\n", x(1), x(2));
   printf("|f(x_sol)| = %f\n", norm(f(x)));
   printf("iterations: %d\n", iter);
@@ -37,8 +37,8 @@ function test_bfgs()
   endif
 
   if 1
+  printf("---- BFGS method ----\n");
   [x, iter, xs] = bfgs(f, x0, tol, max_iter);
-  printf("---- BFGS method ----\n");
   printf("x_sol = (%f, %f)\n", x(1), x(2));
   printf("|f(x_sol)| = %f\n", norm(f(x)));
   printf("iterations: %d\n", iter);
@@ -51,8 +51,8 @@ function test_bfgs()
   endif
 
   if 1
-  [x, iter, xs] = bfgslm(f, x0, 8, tol, max_iter);
   printf("---- Limited-Memory BFGS method ----\n");
+  [x, iter, xs] = bfgslm(f, x0, 8, tol, max_iter);
   printf("x_sol = (%f, %f)\n", x(1), x(2));
   printf("|f(x_sol)| = %f\n", norm(f(x)));
   printf("iterations: %d\n", iter);

@@ -10,8 +10,8 @@ function solve_a2_6_0()
 
   hold on;
 
-  [x, iter, xs] = newton(f, x0, tol, max_iter);
   printf("---- Newton method ----\n");
+  [x, iter, xs] = newton(f, x0, tol, max_iter);
   printf("x_sol = (%f, %f)\n", x(1), x(2));
   printf("|f(x_sol)| = %f\n", norm(f(x)));
   printf("iterations: %d\n", iter);
@@ -23,9 +23,9 @@ function solve_a2_6_0()
     "linewidth", 2);
 
   if 1
+  printf("---- Trust-region method ----\n");
   R0 = .5; #norm(H_0'*g_0)*.5;
   [x, iter, xs] = trust_region(f, x0, R0, .25, .75, .5, 2., tol, max_iter);
-  printf("---- Trust-region method ----\n");
   printf("x_sol = (%f, %f)\n", x(1), x(2));
   printf("|f(x_sol)| = %f\n", norm(f(x)));
   printf("iterations: %d\n", iter);
@@ -38,8 +38,8 @@ function solve_a2_6_0()
   endif
 
   if 1
-  [x, iter, xs] = broyden(f, x0, tol, max_iter);
   printf("---- Broyden method ----\n");
+  [x, iter, xs] = broyden(f, x0, tol, max_iter);
   printf("x_sol = (%f, %f)\n", x(1), x(2));
   printf("|f(x_sol)| = %f\n", norm(f(x)));
   printf("iterations: %d\n", iter);
@@ -52,8 +52,8 @@ function solve_a2_6_0()
   endif
 
   if 1
-  [x, iter, xs] = broydenlm(f, x0, 8, tol, max_iter);
   printf("---- Limited-memory Broyden method ----\n");
+  [x, iter, xs] = broydenlm(f, x0, 8, tol, max_iter);
   printf("x_sol = (%f, %f)\n", x(1), x(2));
   printf("|f(x_sol)| = %f\n", norm(f(x)));
   printf("iterations: %d\n", iter);
@@ -66,8 +66,8 @@ function solve_a2_6_0()
   endif
 
   if 1
-  [x, iter, xs] = bfgs(f, x0, tol, max_iter);
   printf("---- BFGS method ----\n");
+  [x, iter, xs] = bfgs(f, x0, tol, max_iter);
   printf("x_sol = (%f, %f)\n", x(1), x(2));
   printf("|f(x_sol)| = %f\n", norm(f(x)));
   printf("iterations: %d\n", iter);
@@ -80,8 +80,8 @@ function solve_a2_6_0()
   endif
 
   if 1
-  [x, iter, xs] = bfgslm(f, x0, 8, tol, max_iter);
   printf("---- Limited-Memory BFGS method ----\n");
+  [x, iter, xs] = bfgslm(f, x0, 8, tol, max_iter);
   printf("x_sol = (%f, %f)\n", x(1), x(2));
   printf("|f(x_sol)| = %f\n", norm(f(x)));
   printf("iterations: %d\n", iter);

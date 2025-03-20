@@ -10,8 +10,8 @@ function test_broyden()
 
   hold on;
 
-  [x, iter, xs] = newton(f, x0, tol, max_iter);
   printf("---- Newton method ----\n");
+  [x, iter, xs] = newton(f, x0, tol, max_iter);
   printf("x_sol = (%f, %f)\n", x(1), x(2));
   printf("|f(x_sol)| = %f\n", norm(f(x)));
   printf("iterations: %d\n", iter);
@@ -23,8 +23,8 @@ function test_broyden()
     "linewidth", 2);
 
   if 0
-  [x, iter, xs] = broydend(f, x0, tol, max_iter);
   printf("---- Broyden method ----\n");
+  [x, iter, xs] = broydend(f, x0, tol, max_iter);
   printf("x_sol = (%f, %f)\n", x(1), x(2));
   printf("|f(x_sol)| = %f\n", norm(f(x)));
   printf("iterations: %d\n", iter);
@@ -37,8 +37,8 @@ function test_broyden()
   endif
 
   if 1
-  [x, iter, xs] = broyden(f, x0, tol, max_iter);
   printf("---- Broyden method ----\n");
+  [x, iter, xs] = broyden(f, x0, tol, max_iter);
   printf("x_sol = (%f, %f)\n", x(1), x(2));
   printf("|f(x_sol)| = %f\n", norm(f(x)));
   printf("iterations: %d\n", iter);
@@ -51,8 +51,8 @@ function test_broyden()
   endif
 
   if 0
-  [x, iter, xs] = broydenlm(f, x0, 16, tol, max_iter);
   printf("---- Limited-memory Broyden method ----\n");
+  [x, iter, xs] = broydenlm(f, x0, 16, tol, max_iter);
   printf("x_sol = (%f, %f)\n", x(1), x(2));
   printf("|f(x_sol)| = %f\n", norm(f(x)));
   printf("iterations: %d\n", iter);

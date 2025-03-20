@@ -1,10 +1,9 @@
-# Test Trust-Region method against Rosenbrock function
-function test_trust_region()
+# Test nonlinear CG method against Rosenbrock function
+function test_conjgrad()
 
   f = @rosenbrock;
-  #x0 = [2.5; 2.0];
+  #x0 = [1.0; 2.0];
   x0 = [-1.2; 1.0];
-  [~, g_0, H_0] = feval(f, x0);
 
   tol = 1e-6;
   max_iter = 1000;
@@ -23,9 +22,8 @@ function test_trust_region()
     "linestyle", "-", ...
     "linewidth", 2);
 
-  printf("---- Trust-region method ----\n");
-  R0 = norm(H_0'*g_0)*.5;
-  [x, iter, xs] = trust_region(f, x0, R0, .25, .75, .5, 2., tol, max_iter);
+  printf("---- CG method ----\n");
+  [x, iter, xs] = conjgrad(f, x0, tol, max_iter);
   printf("x_sol = (%f, %f)\n", x(1), x(2));
   printf("|f(x_sol)| = %f\n", norm(f(x)));
   printf("iterations: %d\n", iter);

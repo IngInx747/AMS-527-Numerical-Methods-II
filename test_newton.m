@@ -10,8 +10,8 @@ function test_newton()
 
   hold on;
 
-  [x, iter, xs] = newton(f, x0, tol, max_iter, false);
   printf("---- Newton method ----\n");
+  [x, iter, xs] = newton(f, x0, tol, max_iter, false);
   printf("x_sol = (%f, %f)\n", x(1), x(2));
   printf("|f(x_sol)| = %f\n", norm(f(x)));
   printf("iterations: %d\n", iter);
@@ -22,8 +22,8 @@ function test_newton()
     "linestyle", "-", ...
     "linewidth", 2);
 
-  [x, iter, xs] = newton(f, x0, tol, max_iter, true);
   printf("---- Newton method with line-search ----\n");
+  [x, iter, xs] = newton(f, x0, tol, max_iter, true);
   printf("x_sol = (%f, %f)\n", x(1), x(2));
   printf("|f(x_sol)| = %f\n", norm(f(x)));
   printf("iterations: %d\n", iter);
