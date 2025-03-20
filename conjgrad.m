@@ -11,6 +11,7 @@ function [x, iter, xs] = conjgrad(f, x, tol, max_iter, do_line_search = true)
     iter = 0; return
   endif
 
+  # evaluate function
   [~, g] = feval(f, x);
   g_p = g;
   s = - g;

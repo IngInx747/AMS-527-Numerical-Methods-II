@@ -16,42 +16,31 @@ function [x, iter, xs] = bfgslm(f, x, m, tol, max_iter, do_line_search = true)
   S = zeros(N, 0);
   Y = zeros(N, 0);
 
-  # 0-th iteration
-  for iter = 1 : 1
-    # record current position
-    if nargout > 2
-      xs = [xs, x];
-    endif
-    # evaluate function
-    [~, g] = feval(f, x);
-    if norm(g) < tol
-      return
-    endif
-    # determine step length
-    if do_line_search
-      a = line_search(f, x, -g, 10, :);
-    else
-      a = 1.;
-    endif
-    # backup results
-    x_p = x;
-    g_p = g;
-    # update position
-    x -= g*a;
-    # evaluate function
-    [~, g] = feval(f, x);
-    if norm(g) < tol
-      return
-    endif
-  endfor
+  # evaluate function
+  [~, g] = feval(f, x);
+  g_p = g;
+  s = - g;
 
   for iter = 1 : max_iter
     # record current position
     if nargout > 2
       xs = [xs, x];
     endif
+    # determine step length
+    if do_line_search
+      a = line_search(f, x, s, 16, :);
+    else
+      a = 1.;
+    endif
+    # update position
+    s *= a;
+    x += s;
+    # evaluate function
+    [~, g] = feval(f, x);
+    if norm(g) < tol
+      return
+    endif
     # secant equation
-    s = x - x_p;
     y = g - g_p;
     # update memory
     S = enqueue(S, s, m);
@@ -61,22 +50,8 @@ function [x, iter, xs] = bfgslm(f, x, m, tol, max_iter, do_line_search = true)
     if norm(s) < tol
       return
     endif
-    # determine step length
-    if do_line_search
-      a = line_search(f, x, s, :);
-    else
-      a = 1.;
-    endif
     # backup results
-    x_p = x;
     g_p = g;
-    # update position
-    x += s*a;
-    # evaluate function
-    [~, g] = feval(f, x);
-    if norm(g) < tol
-      return
-    endif
   endfor
 
 endfunction
