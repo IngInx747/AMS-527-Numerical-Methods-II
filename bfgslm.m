@@ -7,8 +7,7 @@ function [x, iter, xs] = bfgslm(f, x, m, tol, max_iter, do_line_search = true)
   xs = []; # searching history
 
   if nargout(f) < 2
-    printf("Target function requires C1 smoothness!\n");
-    iter = 0; return
+    error("Target function requires C1 smoothness!");
   endif
 
   # initialize memory

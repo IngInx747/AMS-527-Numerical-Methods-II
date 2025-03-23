@@ -7,8 +7,7 @@ function [x, iter, xs] = newton(f, x, tol, max_iter, do_line_search = true)
   xs = []; # searching history
 
   if nargout(f) < 3
-    printf("Target function requires C2 smoothness!\n");
-    iter = 0; return
+    error("Target function requires C2 smoothness!");
   endif
 
   for iter = 1 : max_iter
@@ -23,8 +22,7 @@ function [x, iter, xs] = newton(f, x, tol, max_iter, do_line_search = true)
     endif
     # check degeneration
     if rank(H) < rows(x)
-      printf("Hessian is degenerated!\n");
-      return
+      error("Hessian is degenerated!");
     endif
     # searching direction
     s = -H\g;

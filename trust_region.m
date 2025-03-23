@@ -1,6 +1,7 @@
 # Generic trust region method
-# f: scalar, gradient, Hessian
-# x: initial guessing position
+# f: [scalar, gradient,  Hessian] (optimal problem)
+#    [merit, equations, Jacobian] (solving equations)
+# x: initial guess
 # R: initial trust region radius
 function [x, iter, xs] = trust_region(f, x, R, t1, t2, r1, r2, tol, max_iter)
 
@@ -17,8 +18,7 @@ function [x, iter, xs] = trust_region(f, x, R, t1, t2, r1, r2, tol, max_iter)
       return
     endif
     if rank(B) < rows(x)
-      printf("Hessian is degenerated!\n");
-      return
+      error("Hessian is degenerated!");
     endif
     # find the position that minimizes the model in the region
     #p = dogleg_path(g, B, R);

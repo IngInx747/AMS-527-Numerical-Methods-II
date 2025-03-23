@@ -9,9 +9,7 @@ function [x, iter, xs] = broydenlm(f, x, m, tol, max_iter, do_line_search = true
   [~, g, B] = feval(f, x); # initial gradient and Hessian
 
   if rank(B) < rows(x)
-    printf("Hessian is degenerated at initial guess!\n");
-    iter = 0;
-    return
+    error("Initial Hessian is degenerated!");
   endif
 
   H = inv(B);
@@ -52,13 +50,11 @@ function [x, iter, xs] = broydenlm(f, x, m, tol, max_iter, do_line_search = true
     n = columns(U);
     J = eye(n) + V'*H_0*U;
     if rank(J) < n
-      printf("Memory is ill-formed!\n");
-      return
+      error("Memory is ill-formed!");
     endif
     H = H_0 - (H_0*U)*(J\V')*H_0;
     if rank(H) < rows(x)
-      printf("Hessian is degenerated!\n");
-      return
+      error("Hessian is degenerated!");
     endif
   endfor
 

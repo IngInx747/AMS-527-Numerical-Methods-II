@@ -12,13 +12,11 @@ function [x, iter, xs] = bfgs(f, x, tol, max_iter, do_line_search = true)
     [~, g] = feval(f, x); # initial gradient
     B = eye(rows(x));
   else
-    printf("Target function requires C1 smoothness!\n");
-    iter = 0; return
+    error("Target function requires C1 smoothness!");
   endif
 
   if !issymmetric(B)
-    printf("Initial Hessian is not symmetric!\n");
-    iter = 0; return
+    error("Initial Hessian is not symmetric!");
   endif
 
   C = inv(B); # inversed Hessian surrogate
@@ -54,8 +52,7 @@ function [x, iter, xs] = bfgs(f, x, tol, max_iter, do_line_search = true)
     R = y*s'/(y'*s);
     C += R'*C*R - R'*C - C*R + s*s'/(y'*s);
     if rank(C) < rows(x)
-      printf("Hessian is degenerated!\n");
-      return
+      error("Hessian is degenerated!");
     endif
   endfor
 

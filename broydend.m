@@ -12,13 +12,11 @@ function [x, iter, xs] = broydend(f, x, tol, max_iter, do_line_search = true)
     [~, g] = feval(f, x); # initial gradient
     B = eye(rows(x));
   else
-    printf("Target function requires C1 smoothness!\n");
-    iter = 0; return
+    error("Target function requires C1 smoothness!");
   endif
 
   if rank(B) < rows(x)
-    printf("Initial Hessian is degenerated!\n");
-    iter = 0; return
+    error("Initial Hessian is degenerated!");
   endif
 
   for iter = 1 : max_iter
@@ -47,8 +45,7 @@ function [x, iter, xs] = broydend(f, x, tol, max_iter, do_line_search = true)
     # update Hessian surrogate
     B += g*s' / (s'*s);
     if rank(B) < rows(x)
-      printf("Hessian is degenerated!\n");
-      return
+      error("Hessian is degenerated!");
     endif
   endfor
 
