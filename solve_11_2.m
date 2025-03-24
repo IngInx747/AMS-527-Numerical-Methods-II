@@ -1,12 +1,12 @@
 #
-function solve_11_1()
+function solve_11_2()
 
   f = @target;
   c_eq = @constraint_eq;
   c_ieq = @constraint_ieq;
   x0 = [0; 0];
 
-  tol = 1e-6;
+  tol = 1e-10;
   max_iter = 1000;
 
   printf("---- Quadratic Penalty method ----\n");
@@ -50,19 +50,19 @@ function [f, g, H] = target(x)
 
 endfunction
 
-function [f, J] = constraint_eq(x)
+function constraint_eq(x)
 
-  f = x(1) + x(2)*2 - 3; # == 0
-
-  if nargout > 1
-    J = [1, 2];
-  endif
+  # return nothing
 
 endfunction
 
-function constraint_ieq(x)
+function [f, J] = constraint_ieq(x)
 
-  # return nothing
+  f = x(1)^2 + x(2)^2 - 2; # <= 0
+
+  if nargout > 1
+    J = [x(1)*2, x(2)*2];
+  endif
 
 endfunction
 

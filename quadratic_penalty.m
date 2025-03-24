@@ -4,7 +4,15 @@ function [x, iter, xs] = quadratic_penalty(f, c_eq, c_ieq, x, h, r, tol, max_ite
   xs = []; # searching history
 
   function [u, g, H] = P(_x)
-    [u, g, H] = penalty(f, c_eq, c_ieq, _x, h);
+    [u, g, H] = subproblem(f, c_eq, c_ieq, _x, h);
+  endfunction
+
+  function [u, g, H] = P_eq(_x)
+    u = penalty_eq(c_eq, _x);
+  endfunction
+
+  function [u, g] = P_ieq(_x)
+    u = penalty_ieq(c_ieq, _x);
   endfunction
 
   x_p = x;
@@ -16,7 +24,8 @@ function [x, iter, xs] = quadratic_penalty(f, c_eq, c_ieq, x, h, r, tol, max_ite
     endif
     # evaluate function
     [~, g] = P(x);
-    if norm(g) < tol
+    p = (P_eq(x) + P_ieq(x))*h;
+    if norm(g) < tol && p < tol
       return
     endif
     # solve unconstraint subproblem
@@ -33,8 +42,8 @@ function [x, iter, xs] = quadratic_penalty(f, c_eq, c_ieq, x, h, r, tol, max_ite
 
 endfunction
 
-#
-function [u, g, H] = penalty(f, c_eq, c_ieq, x, h)
+# target + penalty
+function [u, g, H] = subproblem(f, c_eq, c_ieq, x, h)
 
   n_f = nargout(f);
 
@@ -47,34 +56,69 @@ function [u, g, H] = penalty(f, c_eq, c_ieq, x, h)
   endif
 
   if nargout(c_eq) >= 2
-    [v, J] = feval(c_eq, x);
-    u += v.^2*h*.5;
+    [c, d, B] = penalty_eq(c_eq, x);
+    u += c*h;
     if n_f >= 2
-      g += J'*v*h;
+      g += d*h;
     endif
     if n_f >= 3
-      H += J'*J*h;
+      H += B*h;
     endif
   elseif nargout(c_eq) >= 1
-    v = feval(c_eq, x);
-    u += v.^2*h*.5;
+    c = penalty_eq(c_eq, x);
+    u += c*h;
   endif
 
   if nargout(c_ieq) >= 2
-    [v, J] = feval(c_ieq, x);
-    v = max(v, 0);
-    u += v.^2*h*.5;
+    [c, d, B] = penalty_ieq(c_ieq, x);
+    u += c*h;
     if n_f >= 2
-      g += J'*v*h;
+      g += d*h;
     endif
     if n_f >= 3
-      s = sign(v);
-      J.*= s*s';
-      H += J'*J*h;
+      H += B*h;
     endif
   elseif nargout(c_ieq) >= 1
-    v = max(feval(c_ieq, x), 0);
-    u += v.^2*h*.5;
+    c = penalty_ieq(c_ieq, x);
+    u += c*h;
+  endif
+
+endfunction
+
+# penalty of equality constraints
+function [u, g, H] = penalty_eq(c, x)
+
+  if nargout(c) >= 2
+    [v, J] = feval(c, x);
+    u = v'*v*.5;
+    g = J'*v;
+    H = J'*J;
+  elseif nargout(c) >= 1
+    v = feval(c, x);
+    u = v'*v*.5;
+  else
+    u = 0;
+  endif
+
+endfunction
+
+# penalty of inequality constraints
+function [u, g, H] = penalty_ieq(c, x)
+
+  if nargout(c) >= 2
+    [v, J] = feval(c, x);
+    v = max(v, 0);
+    s = sign(v);
+    J.*= s*s';
+    u = v'*v*.5;
+    g = J'*v;
+    H = J'*J;
+  elseif nargout(c) >= 1
+    v = feval(c, x);
+    v = max(v, 0);
+    u = v'*v*.5;
+  else
+    u = 0;
   endif
 
 endfunction
