@@ -7,9 +7,19 @@ function [x, iter, xs] = lagrange(f, ce, ci, x, r, tol, max_iter)
   xs = []; # searching history
 
   # Lagrange multipliers
-  ze = zeros(size(ce(x)));
-  zi = zeros(size(ci(x)));
+  if nargout(ce) > 0
+    ze = zeros(size(ce(x)));
+  else
+    ze = [];
+  endif
 
+  if nargout(ci) > 0
+    zi = zeros(size(ci(x)));
+  else
+    zi = [];
+  endif
+
+  # define subproblem
   function [u, g, H] = sub(_x)
     [u, g, H] = subproblem(f, ce, ci, _x, ze, zi, r);
   endfunction
@@ -33,8 +43,12 @@ function [x, iter, xs] = lagrange(f, ce, ci, x, r, tol, max_iter)
       return
     endif
     # update multipliers
-    ze += ce(x)*r;
-    zi = max(zi + ci(x)*r, 0);
+    if nargout(ce) > 0
+      ze += ce(x)*r;
+    endif
+    if nargout(ci) > 0
+      zi = max(zi + ci(x)*r, 0);
+    endif
     # backup results
     x_p = x;
   endfor
