@@ -1,42 +1,107 @@
 # Augmented Lagrangian method
-function [x, iter, xs] = lagrange(f, c_eq, c_ieq, x, h, r, tol, max_iter)
+# f: target function
+# ce: equality constraints
+# ci: inequality constraints
+function [x, iter, xs] = lagrange(f, ce, ci, x, r, tol, max_iter)
+
+  xs = []; # searching history
+
+  # Lagrange multipliers
+  ze = zeros(size(ce(x)));
+  zi = zeros(size(ci(x)));
+
+  function [u, g, H] = sub(_x)
+    [u, g, H] = subproblem(f, ce, ci, _x, ze, zi, r);
+  endfunction
+
+  x_p = x;
+
+  for iter = 1 : max_iter
+    # record current position
+    if nargout > 2
+      xs = [xs, x];
+    endif
+    # evaluate function
+    [~, g] = sub(x);
+    if norm(g) < tol
+      return
+    endif
+    # solve unconstraint subproblem
+    #x = newton(@sub, x, tol, max_iter);
+    x = bfgs(@sub, x, tol, max_iter);
+    if norm(x - x_p) < tol
+      return
+    endif
+    # update multipliers
+    ze += ce(x)*r;
+    zi = max(zi + ci(x)*r, 0);
+    # backup results
+    x_p = x;
+  endfor
 
 endfunction
 
-# penalty of inequality constraints
-function [u, g, H] = penalty(c, x)
+# target + dual + penalty
+function [u, g, H] = subproblem(f, ce, ci, x, ze, zi, r)
 
-  if nargout(c) >= 2
-    [v, J] = feval(c, x);
-    v = max(v, 0);
-    s = sign(v);
-    J.*= s*s';
-    u = v'*v*.5;
-    g = J'*v;
-    H = J'*J;
-  elseif nargout(c) >= 1
-    v = feval(c, x);
-    v = max(v, 0);
-    u = v'*v*.5;
+  n_f = nargout(f);
+
+  if n_f >= 3
+    [u, g, H] = feval(f, x);
+  elseif n_f >= 2
+    [u, g] = feval(f, x);
   else
-    u = 0;
+    u = feval(f, x);
   endif
 
-endfunction
+  if nargout(ce) >= 2
+    [v, J] = feval(ce, x);
+    # multiplier terms
+    u += v'*ze;
+    if n_f >= 2
+      g += J'*ze;
+    endif
+    # penalty terms
+    u += v'*v*r*.5;
+    if n_f >= 2
+      g += J'*v*r;
+    endif
+    if n_f >= 3
+      H += J'*J*r;
+    endif
+  elseif nargout(ce) >= 1
+    v = feval(ce, x);
+    # multiplier terms
+    u += v'*ze;
+    # penalty terms
+    u += v'*v*r*.5;
+  endif
 
-# penalty of equality constraints
-function [u, g, H] = penalty_eq(c, x)
-
-  if nargout(c) >= 2
-    [v, J] = feval(c, x);
-    u = v'*v*.5;
-    g = J'*v;
-    H = J'*J;
-  elseif nargout(c) >= 1
-    v = feval(c, x);
-    u = v'*v*.5;
-  else
-    u = 0;
+  if nargout(ci) >= 2
+    [v, J] = feval(ci, x);
+    # multiplier terms
+    v = v + zi/r;
+    u -= zi'*zi/r*.5;
+    # masking
+    v = max(v, 0);
+    J .*= sign(v);
+    # penalty terms
+    u += v'*v*r*.5;
+    if n_f >= 2
+      g += J'*v*r;
+    endif
+    if n_f >= 3
+      H += J'*J*r;
+    endif
+  elseif nargout(ci) >= 1
+    v = feval(ci, x);
+    # multiplier terms
+    v = v + zi/r;
+    u -= zi'*zi/r*.5;
+    # masking
+    v = max(v, 0);
+    # penalty terms
+    u += v'*v*r*.5;
   endif
 
 endfunction

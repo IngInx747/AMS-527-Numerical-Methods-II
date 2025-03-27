@@ -1,5 +1,5 @@
 #
-function solve_11_2()
+function solve_11_3()
 
   f = @target;
   ce = @equalities;
@@ -9,8 +9,8 @@ function solve_11_2()
   tol = 1e-10;
   max_iter = 1000;
 
-  printf("---- Quadratic Penalty method ----\n");
-  [x, iter, xs] = qpenalty(f, ce, ci, x0, 1., 10., tol, max_iter);
+  printf("---- Augmented Lagrangian method ----\n");
+  [x, iter, xs] = lagrange(f, ce, ci, x0, 100., tol, max_iter);
   printf("x_sol = (%f, %f)\n", x(1), x(2));
   printf("|f (x_sol)| = %f\n", norm(f(x)));
   if nargout(ce) > 0
@@ -31,8 +31,8 @@ endfunction
 
 function [f, g, H] = target(x)
 
-  a = 2;
-  b = 1;
+  a = 3;
+  b = 2;
 
   f = (x(1) - a)^2 + (x(2) - b)^2;
 
@@ -50,18 +50,22 @@ function [f, g, H] = target(x)
 
 endfunction
 
-function equalities(x)
+function [f, J] = equalities(x)
 
-  # return nothing
+  f = x(1) + x(2) - 4; # == 0
+
+  if nargout > 1
+      J = [1, 1];
+  endif
 
 endfunction
 
 function [f, J] = inequalities(x)
 
-  f = x(1)^2 + x(2)^2 - 2; # <= 0
+  f = x(1) - 1; # <= 0
 
   if nargout > 1
-    J = [x(1)*2, x(2)*2];
+    J = [1, 0];
   endif
 
 endfunction

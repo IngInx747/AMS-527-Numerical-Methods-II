@@ -1,18 +1,18 @@
 # Quadratic Penalty method
-function [x, iter, xs] = quadratic_penalty(f, c_eq, c_ieq, x, h, r, tol, max_iter)
+# f: target function
+# ce: equality constraints
+# ci: inequality constraints
+# x: initial guess
+function [x, iter, xs] = qpenalty(f, ce, ci, x, r, t, tol, max_iter)
 
   xs = []; # searching history
 
-  function [u, g, H] = P(_x)
-    [u, g, H] = subproblem(f, c_eq, c_ieq, _x, h);
+  function [u, g, H] = sub(_x)
+    [u, g, H] = subproblem(f, ce, ci, _x, r);
   endfunction
 
-  function [u, g, H] = P_eq(_x)
-    u = penalty_eq(c_eq, _x);
-  endfunction
-
-  function [u, g] = P_ieq(_x)
-    u = penalty_ieq(c_ieq, _x);
+  function u = pen(_x)
+    u = penalty_eq(ce, _x) + penalty_ieq(ci, _x);
   endfunction
 
   x_p = x;
@@ -23,19 +23,18 @@ function [x, iter, xs] = quadratic_penalty(f, c_eq, c_ieq, x, h, r, tol, max_ite
       xs = [xs, x];
     endif
     # evaluate function
-    [~, g] = P(x);
-    p = (P_eq(x) + P_ieq(x))*h;
-    if norm(g) < tol && p < tol
+    [~, g] = sub(x);
+    if norm(g) < tol && pen(x)*r < tol
       return
     endif
     # solve unconstraint subproblem
-    x = newton(@P, x, tol, max_iter);
-    #x = bfgs(@P, x, tol, max_iter);
+    #x = newton(@sub, x, tol, max_iter);
+    x = bfgs(@sub, x, tol, max_iter);
     if norm(x - x_p) < tol
       return
     endif
     # increase penalty factor
-    h *= r;
+    r *= t;
     # backup results
     x_p = x;
   endfor
@@ -43,7 +42,7 @@ function [x, iter, xs] = quadratic_penalty(f, c_eq, c_ieq, x, h, r, tol, max_ite
 endfunction
 
 # target + penalty
-function [u, g, H] = subproblem(f, c_eq, c_ieq, x, h)
+function [u, g, H] = subproblem(f, ce, ci, x, r)
 
   n_f = nargout(f);
 
@@ -55,32 +54,32 @@ function [u, g, H] = subproblem(f, c_eq, c_ieq, x, h)
     u = feval(f, x);
   endif
 
-  if nargout(c_eq) >= 2
-    [c, d, B] = penalty_eq(c_eq, x);
-    u += c*h;
+  if nargout(ce) >= 2
+    [c, d, B] = penalty_eq(ce, x);
+    u += c*r;
     if n_f >= 2
-      g += d*h;
+      g += d*r;
     endif
     if n_f >= 3
-      H += B*h;
+      H += B*r;
     endif
-  elseif nargout(c_eq) >= 1
-    c = penalty_eq(c_eq, x);
-    u += c*h;
+  elseif nargout(ce) >= 1
+    c = penalty_eq(ce, x);
+    u += c*r;
   endif
 
-  if nargout(c_ieq) >= 2
-    [c, d, B] = penalty_ieq(c_ieq, x);
-    u += c*h;
+  if nargout(ci) >= 2
+    [c, d, B] = penalty_ieq(ci, x);
+    u += c*r;
     if n_f >= 2
-      g += d*h;
+      g += d*r;
     endif
     if n_f >= 3
-      H += B*h;
+      H += B*r;
     endif
-  elseif nargout(c_ieq) >= 1
-    c = penalty_ieq(c_ieq, x);
-    u += c*h;
+  elseif nargout(ci) >= 1
+    c = penalty_ieq(ci, x);
+    u += c*r;
   endif
 
 endfunction
@@ -108,8 +107,7 @@ function [u, g, H] = penalty_ieq(c, x)
   if nargout(c) >= 2
     [v, J] = feval(c, x);
     v = max(v, 0);
-    s = sign(v);
-    J.*= s*s';
+    J.*= sign(v);
     u = v'*v*.5;
     g = J'*v;
     H = J'*J;
