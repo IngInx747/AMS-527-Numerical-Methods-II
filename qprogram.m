@@ -7,30 +7,30 @@ function [x, iter, xs] = qprogram(A, b, C, d, G, h, x, tol, max_iter)
   # Reduce equality constraints
   #   C*x = d
   # by the transform
-  #   x = T*z + k
-  [T, k, z] = transform(C, d, x);
+  #   x = T*z + q
+  [T, q, z] = transform(C, d, x);
 
   # The quadratic optimal problem becomes
   #   min  |A_*z - b_|^2/2
   #   where A_ = A*T
-  #         b_ = b - A*k
+  #         b_ = b - A*q
   # The inequality constraints become
   #   s.t.  G_*z <= h_
   #   where G_ = G*T
-  #         h_ = h - G*k
+  #         h_ = h - G*q
   A_ = A*T;
-  b_ = b - A*k;
+  b_ = b - A*q;
   G_ = G*T;
-  h_ = h - G*k;
+  h_ = h - G*q;
 
 endfunction
 
 # Reduce the dimensions of the problem by eliminating the constraints
 #   C*x = d
 # The original and the free (reduced) variables follow the transform
-#   x = T*z + k
+#   x = T*z + q
 # where z is the variables of the unconstraint system.
-function [T, k, z] = transform(C, d, x)
+function [T, q, z] = transform(C, d, x)
 
   nc = rows(C); # number of constraints
   nv = rows(d); # number of variables
@@ -66,17 +66,17 @@ function [T, k, z] = transform(C, d, x)
   # Hence we have the matrix form
   # | v0 | = | -R0\R1 * v1 + R0\(Q'*d) | =
   # | v1 |   |          v1             |
-  # | -R0\R1 | * v1 + | R0\(Q'*d) | = T*v1 + k
+  # | -R0\R1 | * v1 + | R0\(Q'*d) | = T*v1 + q
   # |    I   |        |     0     |
   # Let z := v1 which is the reduced variables.
 
-  # We can construct k as
+  # We can construct q as
   # | R0\(Q'*d) | n0 rows
   # |     0     | n1 rows
-  k = Q'*d;
-  k = resize(k, n0, 1);
-  k = R0\k;
-  k = resize(k, nv, 1);
+  q = Q'*d;
+  q = resize(q, n0, 1);
+  q = R0\q;
+  q = resize(q, nv, 1);
 
   # We can construct T as
   # | -R0\R1 |  n0 rows
@@ -84,9 +84,9 @@ function [T, k, z] = transform(C, d, x)
   T = [-R0\R1; eye(n1)];
 
   # Apply permutation from QR
-  #   so that x = P*(T*z + k)
+  #   so that x = P*(T*z + q)
   T = P*T;
-  k = P*k;
+  q = P*q;
 
   # Apply transform on the initial guess
   # z := v1 := (P'*x)[n0+1:nv]
