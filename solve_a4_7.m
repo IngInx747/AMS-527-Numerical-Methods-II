@@ -1,128 +1,52 @@
 #
 function solve_a4_7()
 
-  f = @(x)cos(2*pi*x);
+  f  = @(x)cos(2*pi*x);
+  f1 = @(x)sin(2*pi*x)*-pi*2;
+  f2 = @(x)cos(2*pi*x)*-(pi*2)^2;
 
-  x = linspace(0, 1, 6);
-  y = f(x);
+  xs = linspace(0, 1, 6);
+  #xs = chebyshev(0, 1, 15);
+  ys = f(xs);
 
-  s = ncsplinit(x, y);
+  [s0, s1, s2] = ncspline_init(xs, ys);
 
-  xx = linspace(-0.2, 1.2, 100);
-  yy = ncsplineval(x, s, xx);
-  plot(xx, yy);
+  #xx = linspace(-0.2, 1.2, 100);
+  xx = linspace(0.1, 0.9, 100);
 
-endfunction
+  yy = ncspline_eval(xs, s0, xx);
+  subplot (2, 3, 1);
+  plot(xx, yy, xx, f(xx));
+  axis('square');
+  subplot (2, 3, 4);
+  plot(xx, abs(yy - f(xx)));
+  axis('square');
 
-# Natural cubic spline setup
-function [s0, s1, s2] = ncsplinit(x, y)
+  yy = ncspline_deriv1(xs, s1, xx);
+  subplot (2, 3, 2);
+  plot(xx, yy, xx, f1(xx));
+  axis('square');
+  subplot (2, 3, 5);
+  plot(xx, abs(yy - f1(xx)));
+  axis('square');
 
-  if isrow(x)
-    x = x';
-    y = y';
-  endif
-
-  # number of points
-  # n + 1
-
-  # number of intervals
-  n = rows(x) - 1;
-
-  # intervals
-  dx = x(2:n+1) - x(1:n);
-  dy = y(2:n+1) - y(1:n);
-
-  h0 = dx(1:n-1);
-  h1 = dx(2:n);
-  g0 = dy(1:n-1);
-  g1 = dy(2:n);
-
-  # linear system (n-1 equations)
-  M = [h0/6, (h0 + h1)/3, h1/6];
-  A = spdiags(M, -1:1, n-1,n-1);
-  b = g1./h1 - g0./h0;
-
-  # bending moments
-  m = linsolve(A, b);
-  m = [0; m; 0];
-
-  # 0-order coefficients
-  s0 = [ ...
-    m(2:n+1)./(dx*6), ... # (x - x0)^3
-    m(1:n)  ./(dx*6), ... # (x1 - x)^3
-    y(2:n+1)./dx - m(2:n+1).*dx/6, ... # (x - x0)
-    y(1:n)  ./dx - m(1:n)  .*dx/6];    # (x1 - x)
-
-  # 1-order coefficients
-  if nargout > 1
-    s1 = [ ...
-     -m(2:n+1)./(dx*2), ... # (x - x0)^2
-      m(1:n)  ./(dx*2), ... # (x1 - x)^2
-      y(2:n+1)./dx - m(2:n+1).*dx/6, ... # 1
-     -y(1:n)  ./dx - m(1:n)  .*dx/6];    # 1
-  endif
-
-  # 2-order coefficients
-  if nargout > 2
-    s2 = [ ...
-      m(2:n+1)./dx, ... # (x - x0)
-      m(1:n)  ./dx];    # (x1 - x)
-  endif
+  yy = ncspline_deriv2(xs, s2, xx);
+  subplot (2, 3, 3);
+  plot(xx, yy, xx, f2(xx));
+  axis('square');
+  subplot (2, 3, 6);
+  plot(xx, abs(yy - f2(xx)));
+  axis('square');
 
 endfunction
 
-#
-function yy = ncsplineval(x, s0, xx)
+function x = chebyshev(a, b, n)
 
-  n = max(size(x));
-  yy = zeros(size(xx));
+  # (-1, 1)
+  x = cos(pi/2*(2*[n-1:-1:0] + 1)/n);
 
-  for i = 1 : rows(xx)
-    for j = 1 : columns(xx)
-      xval = xx(i, j);
-      # find the interval
-      [~, k] = find(x <= xval);
-      if isempty(k)
-        k = 0;
-      else
-        k = k(end);
-      endif
-      # evaluate within the interval
-      if k < 1
-        b = x(1) - xval;
-        y = ncsplinevalat(x, s0, 1);
-        d = s0(1,4) - s0(1,3);
-        yy(i, j) = d*b + y;
-      elseif k >= n
-        a = xval - x(end);
-        y = ncsplinevalat(x, s0, n);
-        d = s0(end,3) - s0(end,4);
-        yy(i, j) = d*a + y;
-      else
-        a = xval - x(k);
-        b = x(k+1) - xval;
-        h = [a^3; b^3; a; b];
-        yy(i, j) = s0(k,:)*h;
-      endif
-    endfor
-  endfor
-
-endfunction
-
-#
-function y = ncsplinevalat(x, s0, k)
-
-  n = max(size(x));
-
-  if k >= n # x = x_n
-    d = x(n) - x(n - 1);
-    h = [d ^3; 0; d; 0];
-    y = s0(end,:)*h;
-  else # x = x_k
-    d = x(k + 1) - x(k);
-    h = [0; d ^3; 0; d];
-    y = s0(k,:)*h;
-  endif
+  # (a, b)
+  x = (x + 1)/2 * (b - a) + a;
 
 endfunction
 
