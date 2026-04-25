@@ -1,7 +1,7 @@
 # Quadratic programming
 #   min |A*x - b|^2/2
 #   s.t. C*x = d
-function x = qprogrameq(A, b, C, d)
+function [x, v] = qprogrameq(A, b, C, d)
 
   x = zeros(size(b));
 
@@ -9,7 +9,7 @@ function x = qprogrameq(A, b, C, d)
   #   C*x = d
   # by the transform
   #   x = T*z + q
-  [T, q] = reducelec(C, d, x);
+  [T, q] = null_space(C, d, x);
 
   # The quadratic optimal problem becomes
   #   min  |A_*z - b_|^2/2
@@ -22,10 +22,16 @@ function x = qprogrameq(A, b, C, d)
   z = (A'*A) \ (A'*b);
   x = T*z + q;
 
-  # The equations give the same result
+  # Lagrange multipliers (C*T is full rank)
+  if nargout > 2
+    v = (C*T)'\(T'*(A'*b - A'*A*x));
+  endif
+
+  # This method gives the same result as solved
+  # by an argumented Lagrangian system
   # | A'A  C' | * | x | = | A'b |
-  # |  C   0  |   | _ |   |  d  |
-  # when C is full rank.
+  # |  C   0  |   | v |   |  d  |
+  # which may fail when C is not full rank.
 
 endfunction
 

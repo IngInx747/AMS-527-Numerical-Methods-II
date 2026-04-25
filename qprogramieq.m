@@ -1,4 +1,4 @@
-# Quadratic programming by Active set method
+# Quadratic programming by Active Set method
 #   min |A*x - b|^2/2
 #   s.t. C*x <= d
 function [x, iter, xs] = qprogramieq(A, b, C, d, x, tol, max_iter)
@@ -27,7 +27,14 @@ function [x, iter, xs] = qprogramieq(A, b, C, d, x, tol, max_iter)
     s = qprogrameq(A, b, Ce, de) - x;
     if norm(s) < tol
       return
-    else
+    else # find the step not exceeding the set
+      an = d - C*x; ad = C*s;
+      a = ifelse(!ac & ad > 0, an./ad, 1);
+      [a, k] = min(a);
+      x += s*a;
+      if a < 1 # there is a blocking constraint
+        ac(k) = 1;
+      endif
     endif
   endfor
 

@@ -1,9 +1,9 @@
-# Reduce the size of the problem by the linear equalities constraints
+# Reduce the variables by removing the null space of constraints
 #   C*x = d
-# The original and the free (reduced) variables follow the transform
+# The original and the free variables follow the transform
 #   x = T*z + q
 # where z is the variables of the unconstraint system.
-function [T, q, z] = reducelec(C, d, x)
+function [T, q, z] = null_space(C, d, x)
 
   nv = columns(C); # number of variables
   nc = rows(C); # number of constraints
@@ -61,7 +61,7 @@ function [T, q, z] = reducelec(C, d, x)
   T = P*T;
   q = P*q;
 
-  # Apply transform on the initial guess
+  # Apply transform to the initial values
   # z := v1 := (P'*x)[n0+1:nv]
   if nargout > 2
     z = P'*x;
