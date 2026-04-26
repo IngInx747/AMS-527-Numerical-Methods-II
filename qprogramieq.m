@@ -24,9 +24,15 @@ function [x, iter, xs] = qprogramieq(A, b, C, d, x, tol, max_iter)
     id = find(ac); # ids of active constraints
     Ce = C(id, :);
     de = d(id, :);
-    s = qprogrameq(A, b, Ce, de) - x;
+    [s, y] = qprogrameq(A, b, Ce, de) - x;
     if norm(s) < tol
-      return
+      eq = C*x - d;
+      if min(y) > -tol
+        return
+      else
+        [_, k] = min(y);
+        ac(k) = 0;
+      endif
     else # find the step not exceeding the set
       an = d - C*x; ad = C*s;
       a = ifelse(!ac & ad > 0, an./ad, 1);

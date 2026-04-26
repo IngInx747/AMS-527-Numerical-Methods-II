@@ -2,7 +2,7 @@
 #   C*x = d
 # The original and the free variables(x_z) follow the transform
 #   x = Z*x_z + Y*x_y
-#     = Z*x_z + y
+#     = Z*x_z + q
 # where C*Z = 0 and C*Y is full rank.
 function varargout = null_space(C, d, varargin)
 
@@ -40,7 +40,7 @@ function varargout = null_space(C, d, varargin)
   # Hence we have the matrix form
   # | v0 | = | -R0\R1 * v1 + R0\(Q'*d) | =
   # | v1 |   |          v1             |
-  # | -R0\R1 | * v1 + | R0\(Q'*d) | = Z*v1 + y
+  # | -R0\R1 | * v1 + | R0\(Q'*d) | = Z*v1 + q
   # |    I   |        |     0     |
   # Let x_z := v1 which are the free variables.
 
@@ -57,17 +57,17 @@ function varargout = null_space(C, d, varargin)
   # We only need C*Y to be full rank so any Y works
   Y = resize(eye(n0), nv, n0);
 
-  # We can construct y as
+  # We can construct q as
   # | R0\(Q'*d) | n0 rows
   # |     0     | n1 rows
   x_y = resize(Q'*d, n0, 1);
-  y = resize(R0\x_y, nv, 1); # y = Y*x_y
+  q = resize(R0\x_y, nv, 1); # q = Y*x_y
 
   # Apply permutation to the transform
   #   x = P*(Z*x_z + Y*x_y)
   Z = P*Z;
   Y = P*Y;
-  y = P*y;
+  q = P*q;
 
   # Apply permutation to the initial x
   #   x_z := v1 := (P'*x)[n0+1:nv]
@@ -77,15 +77,15 @@ function varargout = null_space(C, d, varargin)
 
   # export everything
   varargout{1} = Z;
-  varargout{2} = y;
+  varargout{2} = q;
 
   if nargout == 3
-    if nargin > 2 # [Z, y, x_z]
+    if nargin > 2 # [Z, q, x_z]
       varargout{3} = x_z;
-    else # [Z, y, Y]
+    else # [Z, q, Y]
       varargout{3} = Y;
     endif
-  elseif nargout == 4 # [Z, y, Y, x_z]
+  elseif nargout == 4 # [Z, q, Y, x_z]
     varargout{3} = Y;
     varargout{4} = x_z;
   endif
