@@ -3,28 +3,27 @@
 #   s.t. C*x = d
 function [x, v] = qprogrameq(A, b, C, d)
 
-  x = zeros(size(b));
-
   # Reduce equality constraints
   #   C*x = d
   # by the transform
-  #   x = T*z + q
-  [T, q] = null_space(C, d, x);
+  #   x = Z*z + y
+  # where C*Z = 0
+  [Z, y, Y] = null_space(C, d);
 
   # The quadratic optimal problem becomes
-  #   min  |A_*z - b_|^2/2
-  #   where A_ = A*T
-  #         b_ = b - A*q
-  b -= A*q;
-  A = A*T;
+  #   min  |M*z - g|^2/2
+  #   where M = A*Z
+  #         g = b - A*y
+  M = A*Z;
+  g = b - A*y;
 
   # Solve the reduced problem
-  z = (A'*A) \ (A'*b);
-  x = T*z + q;
+  z = (M'*M)\(M'*g);
+  x = Z*z + y;
 
-  # Lagrange multipliers (C*T is full rank)
-  if nargout > 2
-    v = (C*T)'\(T'*(A'*b - A'*A*x));
+  # Lagrange multipliers
+  if nargout > 1
+    v = (C*Y)'\(Y'*A'*(b - A*x));
   endif
 
   # This method gives the same result as solved

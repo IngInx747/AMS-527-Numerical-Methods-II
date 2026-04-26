@@ -1,9 +1,10 @@
-# Reduce the variables by removing the null space of constraints
+# Reduce the variables by keeping the null space of constraints
 #   C*x = d
-# The original and the free variables follow the transform
-#   x = T*z + q
-# where z is the variables of the unconstraint system.
-function [T, q, z] = null_space(C, d, x)
+# The original and the free variables(x_z) follow the transform
+#   x = Z*x_z + Y*x_y
+#     = Z*x_z + y
+# where C*Z = 0 and C*Y is full rank.
+function varargout = null_space(C, d, varargin)
 
   nv = columns(C); # number of variables
   nc = rows(C); # number of constraints
@@ -39,33 +40,54 @@ function [T, q, z] = null_space(C, d, x)
   # Hence we have the matrix form
   # | v0 | = | -R0\R1 * v1 + R0\(Q'*d) | =
   # | v1 |   |          v1             |
-  # | -R0\R1 | * v1 + | R0\(Q'*d) | = T*v1 + q
+  # | -R0\R1 | * v1 + | R0\(Q'*d) | = Z*v1 + y
   # |    I   |        |     0     |
-  # Let z := v1 which is the reduced variables.
+  # Let x_z := v1 which are the free variables.
 
-  # We can construct q as
-  # | R0\(Q'*d) | n0 rows
-  # |     0     | n1 rows
-  q = Q'*d;
-  q = resize(q, n0, 1);
-  q = R0\q;
-  q = resize(q, nv, 1);
-
-  # We can construct T as
+  # We can construct Z as
   # | -R0\R1 |  n0 rows
   # |    I   |  n1 rows
-  T = [-R0\R1; eye(n1)];
+  Z = [-R0\R1; eye(n1)];
 
-  # Apply permutation from QR
-  #   so that x = P*(T*z + q)
-  T = P*T;
-  q = P*q;
+  # We can construct Y as
+  # |  R0\I  |  n0 rows
+  # |    0   |  n1 rows
+  #Y = resize(R0\eye(n0), nv, n0);
 
-  # Apply transform to the initial values
-  # z := v1 := (P'*x)[n0+1:nv]
-  if nargout > 2
-    z = P'*x;
-    z = z(n0+1:end);
+  # We only need C*Y to be full rank so any Y works
+  Y = resize(eye(n0), nv, n0);
+
+  # We can construct y as
+  # | R0\(Q'*d) | n0 rows
+  # |     0     | n1 rows
+  x_y = resize(Q'*d, n0, 1);
+  y = resize(R0\x_y, nv, 1); # y = Y*x_y
+
+  # Apply permutation to the transform
+  #   x = P*(Z*x_z + Y*x_y)
+  Z = P*Z;
+  Y = P*Y;
+  y = P*y;
+
+  # Apply permutation to the initial x
+  #   x_z := v1 := (P'*x)[n0+1:nv]
+  if nargin > 2
+    x_z = (P'*varargin{1})(n0+1:end);
+  endif
+
+  # export everything
+  varargout{1} = Z;
+  varargout{2} = y;
+
+  if nargout == 3
+    if nargin > 2 # [Z, y, x_z]
+      varargout{3} = x_z;
+    else # [Z, y, Y]
+      varargout{3} = Y;
+    endif
+  elseif nargout == 4 # [Z, y, Y, x_z]
+    varargout{3} = Y;
+    varargout{4} = x_z;
   endif
 
 endfunction
