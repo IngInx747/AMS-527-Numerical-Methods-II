@@ -5,15 +5,13 @@ function [x, iter, xs] = qprogramieq(A, b, C, d, x, tol, max_iter)
 
   nv = rows(b); # number of variables
   nc = rows(d); # number of constraints
-  ac = (C*x - d) >= 0; # active set
+  ac = (C*x - d) >= 0; # active set bits
   xs = []; # searching history
 
-  # With C_k*x_k = d_k, C_k*x_{k+1} = d_k and
-  # x_{k+1} = x_k + s, the subproblem w.r.t
-  # the search direction s_k is defined as:
-  #   min |A*(x_k + s_k) - b|^2/2
-  #   s.t. C_k*s_k = 0
-  # where C_k, d_k are the current active set.
+  # The subproblem regarding the current active set:
+  #   min |A*x_k  - b|^2/2
+  #   s.t. C_k*x_k = d_k
+  # where {k \in K} are ids of the active equalities.
 
   for iter = 1 : max_iter
     # record current position
@@ -24,21 +22,20 @@ function [x, iter, xs] = qprogramieq(A, b, C, d, x, tol, max_iter)
     id = find(ac); # ids of active constraints
     Ce = C(id, :);
     de = d(id, :);
-    [s, y] = qprogrameq(A, b, Ce, de) - x;
+    [s, y] = qprogrameq(A, b, Ce, de); s -= x;
     if norm(s) < tol
-      eq = C*x - d;
-      if min(y) > -tol
+      if isempty(y) || min(y) > -tol # reach a critical point
         return
-      else
+      else # improve by dropping one of the active constraints
         [_, k] = min(y);
-        ac(k) = 0;
+        ac(id(k)) = 0;
       endif
-    else # find the step not exceeding the set
+    else # find the step not breaking the inactive constraints
       an = d - C*x; ad = C*s;
       a = ifelse(!ac & ad > 0, an./ad, 1);
       [a, k] = min(a);
       x += s*a;
-      if a < 1 # there is a blocking constraint
+      if a < 1 # add a blocking constraint to the active set
         ac(k) = 1;
       endif
     endif

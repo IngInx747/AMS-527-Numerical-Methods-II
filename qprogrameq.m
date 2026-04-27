@@ -3,17 +3,17 @@
 #   s.t. C*x = d
 function [x, y] = qprogrameq(A, b, C, d)
 
-  # Reduce equality constraints
+  # Reduce the constraints
   #   C*x = d
   # by the transform
   #   x = Z*z + q
   # where C*Z = 0
   [Z, q, Y] = null_space(C, d);
 
-  # The quadratic optimal problem becomes
+  # The problem is reduced to
   #   min  |M*z - g|^2/2
-  #   where M = A*Z
-  #         g = b - A*q
+  # where M = A*Z and
+  #       g = b - A*q
   M = A*Z;
   g = b - A*q;
 
@@ -21,12 +21,15 @@ function [x, y] = qprogrameq(A, b, C, d)
   z = (M'*M)\(M'*g);
   x = Z*z + q;
 
-  # Lagrange multipliers
+  # Get the Lagrange multipliers
   if nargout > 1
     y = (C*Y)'\(Y'*A'*(b - A*x));
   endif
 
-  # This method gives the same result as solved
+  # Note that when C is not full rank, C*Y is a non-square
+  # whose inversion becomes solving a least-square problem.
+
+  # It gives the same result as solved
   # by an argumented Lagrangian system
   # | A'A  C' | * | x | = | A'b |
   # |  C   0  |   | y |   |  d  |

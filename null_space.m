@@ -55,13 +55,14 @@ function varargout = null_space(C, d, varargin)
   #Y = resize(R0\eye(n0), nv, n0);
 
   # We only need C*Y to be full rank so any Y works
+  # and in this setting, q = Y*x_y no longer holds.
   Y = resize(eye(n0), nv, n0);
 
   # We can construct q as
   # | R0\(Q'*d) | n0 rows
   # |     0     | n1 rows
   x_y = resize(Q'*d, n0, 1);
-  q = resize(R0\x_y, nv, 1); # q = Y*x_y
+  q = resize(R0\x_y, nv, 1);
 
   # Apply permutation to the transform
   #   x = P*(Z*x_z + Y*x_y)

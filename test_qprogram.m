@@ -1,7 +1,7 @@
 #
-function test_active_set()
+function test_qprogram()
 
-   A = [
+  A = [
     0.9501, 0.7620, 0.6153, 0.4057;
     0.2311, 0.4564, 0.7919, 0.9354;
     0.6068, 0.0185, 0.9218, 0.9169;
@@ -13,6 +13,10 @@ function test_active_set()
     0.8131;
     0.0098;
     0.1388];
+
+  Ce = [3, 5, 7, 9];
+  de = [4];
+
   Ci = [
     0.2027, 0.2721, 0.7467, 0.4659;
     0.1987, 0.1988, 0.4450, 0.4186;
@@ -21,20 +25,34 @@ function test_active_set()
     0.5251;
     0.2026;
     0.6721];
-  Ce = [3, 5, 7, 9];
-  de = [4];
-  Cl = [-0.1, -0.1, -0.1, -0.1];
-  Cu = [2, 2, 2, 2];
+
+  # lower bounds
+  dl = [
+    -0.1;
+    -0.1;
+    -0.1;
+    -0.1];
+  # upper bounds
+  du = [
+    2;
+    2;
+    2;
+    2];
+
+  # -0.100000 -0.100000 0.159909 0.408960
+
+  Ci = [Ci; -eye(4); eye(4)];
+  di = [di; -dl; du];
 
   tol = 1e-10;
   max_iter = 1000;
-  x = zeros(columns(A), 1);
+  x = [0; 0; 0; 0];
 
   printf("---- Quadratic Programming: Active Set method ----\n");
-  [x, iter, xs] = qprogramieq(A, b, Ci, di, x, tol, max_iter);
+  x = qprogram(A, b, Ce, de, Ci, di, x, tol, max_iter);
 
-  printf("|f (x_sol)| = %f\n", norm(A*x - b));
-  x
+  printf("|f(x_sol)| = %f\n", norm(A*x - b));
+  printf("["); printf("%f ", x); printf("]\n");
 
 endfunction
 

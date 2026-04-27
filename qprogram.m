@@ -1,27 +1,32 @@
 # Quadratic programming
 #   min |A*x - b|^2/2
-#   s.t. C*x = d
-#        G*x<= h
-function [x, iter, xs] = qprogram(A, b, C, d, G, h, x, tol, max_iter)
+#   s.t. C_e*x  = d_e
+#        C_i*x <= d_i
+function x = qprogram(A, b, Ce, de, Ci, di, x, tol, max_iter)
 
-  # Reduce equality constraints
+  # Reduce the constraints
   #   C*x = d
   # by the transform
-  #   x = T*z + q
-  [T, q, z] = reducelec(C, d, x);
+  #   x = Z*z + q
+  # where C*Z = 0
+  [Z, q, z] = null_space(Ce, de, x);
 
-  # The quadratic optimal problem becomes
+  # The problem becomes
   #   min  |A_*z - b_|^2/2
-  #   where A_ = A*T
+  #   where A_ = A*Z and
   #         b_ = b - A*q
+  b -= A*q;
+  A  = A*Z;
+
   # The inequality constraints become
-  #   s.t.  G_*z <= h_
-  #   where G_ = G*T
-  #         h_ = h - G*q
-  A_ = A*T;
-  b_ = b - A*q;
-  G_ = G*T;
-  h_ = h - G*q;
+  #   s.t.  C_*z <= d_
+  #   where C_ = C*Z and
+  #         d_ = d - C*q
+  di -= Ci*q;
+  Ci  = Ci*Z;
+
+  z = qprogramieq(A, b, Ci, di, z, tol, max_iter);
+  x = Z*z + q;
 
 endfunction
 
