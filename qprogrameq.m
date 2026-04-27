@@ -1,5 +1,5 @@
 # Quadratic programming
-#   min |A*x - b|^2/2
+#   min x'*A*x/2 + x'*b
 #   s.t. C*x = d
 function [x, y] = qprogrameq(A, b, C, d)
 
@@ -11,19 +11,19 @@ function [x, y] = qprogrameq(A, b, C, d)
   [Z, q, Y] = null_space(C, d);
 
   # The problem is reduced to
-  #   min  |M*z - g|^2/2
-  # where M = A*Z and
-  #       g = b - A*q
-  M = A*Z;
-  g = b - A*q;
+  #   min x'*M*x/2 + x'*g
+  # where M = Z'*A*Z  and
+  #       g = Z'*(b + A*q)
+  M = Z'*A*Z;
+  g = Z'*(b + A*q);
 
   # Solve the reduced problem
-  z = (M'*M)\(M'*g);
+  z = M\-g;
   x = Z*z + q;
 
   # Get the Lagrange multipliers
   if nargout > 1
-    y = (C*Y)'\(Y'*A'*(b - A*x));
+    y = -(C*Y)'\(Y'*(A*x + b));
   endif
 
   # Note that when C is not full rank, C*Y is a non-square
@@ -31,10 +31,10 @@ function [x, y] = qprogrameq(A, b, C, d)
 
   # It gives the same result as solved
   # by an argumented Lagrangian system
-  # | A'A  C' | * | x | = | A'b |
-  # |  C   0  |   | y |   |  d  |
+  # | A  C' | * | x | = | -b |
+  # | C  0  |   | y |   |  d |
   # which may fail when C is not full rank.
-  # [A'*A, C'; C, zeros(rows(C))]\[A'*b; d]
+  # [A, C'; C, zeros(rows(C))]\[-b; d]
 
 endfunction
 

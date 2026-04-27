@@ -49,7 +49,7 @@ function test_qprogram()
   x = [0; 0; 0; 0];
 
   printf("---- Quadratic Programming: Active Set method ----\n");
-  x = qprogram(A, b, Ce, de, Ci, di, x, tol, max_iter);
+  x = qprogram(A'*A, -A'*b, Ce, de, Ci, di, x, tol, max_iter);
 
   printf("|f(x_sol)| = %f\n", norm(A*x - b));
   printf("["); printf("%f ", x); printf("]\n");

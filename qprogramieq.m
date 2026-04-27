@@ -1,5 +1,5 @@
 # Quadratic programming by Active Set method
-#   min |A*x - b|^2/2
+#   min x'*A*x/2 + x'*b
 #   s.t. C*x <= d
 function [x, iter, xs] = qprogramieq(A, b, C, d, x, tol, max_iter)
 
@@ -9,8 +9,8 @@ function [x, iter, xs] = qprogramieq(A, b, C, d, x, tol, max_iter)
   xs = []; # searching history
 
   # The subproblem regarding the current active set:
-  #   min |A*x_k  - b|^2/2
-  #   s.t. C_k*x_k = d_k
+  #   min x_k'*A*x_k/2 + x_k'*b
+  #   s.t. C_k * x_k = d_k
   # where {k \in K} are ids of the active equalities.
 
   for iter = 1 : max_iter
