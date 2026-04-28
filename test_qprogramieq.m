@@ -4,7 +4,7 @@ function test_qprogramieq()
   # f = ((x-xc)^2 + (y-yc)^2)/2
   #   = (x^2 + y^2 - 2*xc*x - 2*yc*y + xc^2 + yc^2)/2
   #   = [x y]*I*[x; y]/2 - [x y]*[xc; yc] + b^2/2
-  # A = I(2)/2, b = -[xc; yc]
+  # A = I(2), b = -[xc; yc]
   A = [
     1, 0;
     0, 1];
