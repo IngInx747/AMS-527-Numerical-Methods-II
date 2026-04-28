@@ -12,11 +12,11 @@ function x = qprogram(A, b, Ce, de, Ci, di, x, tol, max_iter)
   [Z, q, z] = null_space(Ce, de, x);
 
   # The problem is reduced to
-  #   min x'*M*x/2 + x'*g
-  # where M = Z'*A*Z  and
-  #       g = Z'*(b + A*q)
-  M = Z'*A*Z;
-  g = Z'*(b + A*q);
+  #   min x'*A_*x/2 + x'*b_
+  # where A_ = Z'*A*Z  and
+  #       b_ = Z'*(b + A*q)
+  b = Z'*(b + A*q);
+  A = Z'*A*Z;
 
   # The inequality constraints become
   #   s.t.  C_*z <= d_
@@ -25,7 +25,7 @@ function x = qprogram(A, b, Ce, de, Ci, di, x, tol, max_iter)
   di -= Ci*q;
   Ci  = Ci*Z;
 
-  z = qprogramieq(M, g, Ci, di, z, tol, max_iter);
+  z = qprogramieq(A, b, Ci, di, z, tol, max_iter);
   x = Z*z + q;
 
 endfunction
